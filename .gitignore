@@ -1,0 +1,58 @@
+# Gradle files
+.gradle/
+build/
+gradle/
+
+# Android specific
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+local.properties
+
+# IDE specific
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+
+# Android Studio specific
+.DS_Store
+.gradle
+.gradle/
+local.properties
+.idea/
+.idea/caches
+.idea/modules.xml
+.idea/misc.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches/build_file_checksums.ser
+.idea/navEditor.xml
+.idea/kotlinc.xml
+.idea/vcs.xml
+
+# Build output
+*.jks
+*.ks
+*.so
+
+# Project specific
+/history-storage/
+/indexingStamp/
+/project-model-cache/
+*.log
+
+# OS specific
+Thumbs.db
+.DS_Store
