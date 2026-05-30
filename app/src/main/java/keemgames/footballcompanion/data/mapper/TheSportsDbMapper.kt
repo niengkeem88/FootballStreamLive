@@ -7,6 +7,10 @@ import keemgames.footballcompanion.domain.model.VideoHighlight
 fun TheSportsDbEventDto.toMatch(): Match {
     return Match(
         id = idEvent ?: "",
+        idLeague = idLeague ?: "",
+        homeTeamId = idHomeTeam ?: "",
+        awayTeamId = idAwayTeam ?: "",
+        venue = strVenue ?: "",
         title = strEvent ?: "${strHomeTeam ?: "?"} vs ${strAwayTeam ?: "?"}",
         competition = strLeague ?: "Unknown League",
         date = dateEvent ?: "",

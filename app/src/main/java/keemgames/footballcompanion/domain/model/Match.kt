@@ -24,12 +24,16 @@ data class Match(
     val awayScore: String? = null,
     val status: String = "",
     val videoUrl: String? = null,
-    val leagueBadge: String? = null
+    val leagueBadge: String? = null,
+    val idLeague: String = "",
+    val homeTeamId: String = "",
+    val awayTeamId: String = "",
+    val venue: String = ""
 ) {
     val category: MatchCategory
         get() = when (status.uppercase()) {
             "LIVE", "1H", "2H", "HT", "ET", "P", "INT", "SUSP" -> MatchCategory.LIVE
             "NS" -> MatchCategory.UPCOMING
-            else -> MatchCategory.COMPLETED // FT, AET, ABD, CAN, WO, AWARDED, POSTPONED, etc.
+            else -> MatchCategory.COMPLETED
         }
 }

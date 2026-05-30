@@ -2,7 +2,6 @@ package keemgames.footballcompanion.data.mapper
 
 import keemgames.footballcompanion.data.local.entity.FavoriteMatchEntity
 import keemgames.footballcompanion.domain.model.Match
-import keemgames.footballcompanion.domain.model.VideoHighlight
 
 fun Match.toFavoriteEntity(): FavoriteMatchEntity {
     return FavoriteMatchEntity(
@@ -20,7 +19,11 @@ fun Match.toFavoriteEntity(): FavoriteMatchEntity {
         awayScore = awayScore,
         status = status,
         videoUrl = videoUrl,
-        leagueBadge = leagueBadge
+        leagueBadge = leagueBadge,
+        idLeague = idLeague,
+        homeTeamId = homeTeamId,
+        awayTeamId = awayTeamId,
+        venue = venue
     )
 }
 
@@ -41,6 +44,10 @@ fun FavoriteMatchEntity.toMatch(): Match {
         awayScore = awayScore,
         status = status,
         videoUrl = videoUrl,
-        leagueBadge = leagueBadge
+        leagueBadge = leagueBadge,
+        idLeague = idLeague,
+        homeTeamId = homeTeamId,
+        awayTeamId = awayTeamId,
+        venue = venue
     )
 }

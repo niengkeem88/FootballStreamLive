@@ -33,21 +33,12 @@ fun HomeScreen(
 
     val interstitialHelper = remember { AdMobInterstitialHelper() }
     LaunchedEffect(Unit) {
-        activity?.let {
-            interstitialHelper.loadAd(
-                it,
-                adUnitId = "ca-app-pub-3940256099942544/1033173712"
-            )
-        }
+        activity?.let { interstitialHelper.loadAd(it, "ca-app-pub-3940256099942544/1033173712") }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        VibrantHeader(
-            title = "FootballPulse",
-            subtitle = "The Digital Arena"
-        )
+        VibrantHeader(title = "FootballPulse", subtitle = "The Digital Arena")
 
-        // Tab Row
         val tabs = listOf("Live", "Upcoming", "Completed")
         TabRow(
             selectedTabIndex = state.selectedTab,
@@ -61,30 +52,16 @@ fun HomeScreen(
                     onClick = { viewModel.selectTab(index) },
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = title,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                            val count = when (index) {
-                                0 -> state.liveMatches.size
-                                1 -> state.upcomingMatches.size
-                                2 -> state.completedMatches.size
-                                else -> 0
-                            }
+                            Text(title, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
+                            val count = when (index) { 0 -> state.liveMatches.size; 1 -> state.upcomingMatches.size; 2 -> state.completedMatches.size; else -> 0 }
                             if (count > 0) {
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(Modifier.width(6.dp))
                                 Surface(
                                     shape = MaterialTheme.shapes.small,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary
-                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                                 ) {
-                                    Text(
-                                        text = "$count",
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                                else MaterialTheme.colorScheme.onSurface
-                                    )
+                                    Text("$count", Modifier.padding(horizontal = 6.dp, vertical = 2.dp), style = MaterialTheme.typography.labelSmall,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface)
                                 }
                             }
                         }
@@ -93,126 +70,80 @@ fun HomeScreen(
             }
         }
 
-        // Content
         when {
             state.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
-
             state.error != null -> {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(Modifier.weight(1f).fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = state.error ?: "",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.getMatches() }) {
-                            Text("Retry")
-                        }
+                        Text(state.error ?: "", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = { viewModel.getMatches() }) { Text("Retry") }
                     }
                 }
             }
-
             else -> {
                 val groupedMatches: Map<String, List<Match>> = when (state.selectedTab) {
-                    0 -> state.groupedLive
-                    1 -> state.groupedUpcoming
-                    2 -> state.groupedCompleted
-                    else -> emptyMap()
+                    0 -> state.groupedLive; 1 -> state.groupedUpcoming; 2 -> state.groupedCompleted; else -> emptyMap()
                 }
 
                 if (groupedMatches.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val emptyText = when (state.selectedTab) {
-                            0 -> "No live matches right now"
-                            1 -> "No upcoming fixtures"
-                            2 -> "No completed matches"
-                            else -> "No matches found"
-                        }
-                        Text(
-                            text = emptyText,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                    Box(Modifier.weight(1f).fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        val emptyText = when (state.selectedTab) { 0 -> "No live matches right now"; 1 -> "No upcoming fixtures"; 2 -> "No completed matches"; else -> "No matches found" }
+                        Text(emptyText, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
                         contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
                         groupedMatches.entries.forEachIndexed { leagueIndex, (league, matches) ->
                             // League header
                             item(key = "header_$league") {
                                 val badge = matches.firstOrNull()?.leagueBadge
-                                LeagueSectionHeader(
-                                    leagueName = league,
-                                    leagueBadge = badge,
-                                    matchCount = matches.size
-                                )
+                                LeagueSectionHeader(leagueName = league, leagueBadge = badge, matchCount = matches.size)
                             }
 
-                            // Match cards for this league
-                            items(matches, key = { it.id }) { match ->
-                                MatchCard(
-                                    match = match,
-                                    onClick = {
+                            // Match cards with in-content banners every 3 matches
+                            matches.forEachIndexed { matchIndex, match ->
+                                item(key = match.id) {
+                                    MatchCard(match = match, onClick = {
                                         activity?.let { act ->
-                                            interstitialHelper.showAdIfReady(act) {
-                                                onNavigateToDetails(match.id)
-                                            }
+                                            interstitialHelper.showAdIfReady(act) { onNavigateToDetails(match.id) }
                                         } ?: onNavigateToDetails(match.id)
-                                    }
-                                )
-                            }
+                                    })
+                                }
 
-                            // Native ad after every 6 matches in each league section
-                            // Also native ad after a league section (occasionally)
-                            if (leagueIndex > 0 && leagueIndex % 2 == 0) {
-                                item(key = "native_ad_after_$league") {
-                                    AdMobNativeAdView(
-                                        adUnitId = "ca-app-pub-3940256099942544/2247696110",
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
+                                // In-content banner ad every 3 matches for a premium look
+                                if ((matchIndex + 1) % 3 == 0 && matchIndex < matches.size - 1) {
+                                    item(key = "banner_${league}_$matchIndex") {
+                                        Spacer(Modifier.height(4.dp))
+                                        AdMobBannerAd(
+                                            adUnitId = "ca-app-pub-3940256099942544/6300978111",
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        Spacer(Modifier.height(4.dp))
+                                    }
                                 }
                             }
 
-                            // Spacer between leagues
-                            item(key = "spacer_after_$league") {
-                                Spacer(modifier = Modifier.height(8.dp))
+                            // Native ad after league sections
+                            if (leagueIndex > 0 && leagueIndex % 2 == 0) {
+                                item(key = "native_$league") {
+                                    AdMobNativeAdView(adUnitId = "ca-app-pub-3940256099942544/2247696110", modifier = Modifier.fillMaxWidth())
+                                }
                             }
+
+                            item(key = "spacer_$league") { Spacer(Modifier.height(8.dp)) }
                         }
                     }
                 }
             }
         }
 
-        AdMobBannerAd(
-            adUnitId = "ca-app-pub-3940256099942544/6300978111",
-            modifier = Modifier.fillMaxWidth()
-        )
+        AdMobBannerAd(adUnitId = "ca-app-pub-3940256099942544/6300978111", modifier = Modifier.fillMaxWidth())
     }
 }

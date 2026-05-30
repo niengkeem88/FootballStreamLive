@@ -20,5 +20,9 @@ data class FavoriteMatchEntity(
     val awayScore: String? = null,
     val status: String = "",
     val videoUrl: String? = null,
-    val leagueBadge: String? = null
+    val leagueBadge: String? = null,
+    val idLeague: String = "",
+    val homeTeamId: String = "",
+    val awayTeamId: String = "",
+    val venue: String = ""
 )

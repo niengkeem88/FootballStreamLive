@@ -38,11 +38,21 @@ interface TheSportsDbApiService {
         @Query("id") leagueId: String
     ): TheSportsDbEventsResponse
 
+    @GET("lookuptable.php")
+    suspend fun getStandings(
+        @Query("l") leagueId: String,
+        @Query("s") season: String = CURRENT_SEASON
+    ): TheSportsDbStandingsResponse
+
+    @GET("lookup_all_players.php")
+    suspend fun getTeamPlayers(
+        @Query("id") teamId: String
+    ): TheSportsDbPlayersResponse
+
     companion object {
         const val BASE_URL = "https://www.thesportsdb.com/api/v1/json/3/"
         const val DEFAULT_API_KEY = "3"
 
-        // Major soccer league IDs
         val MAJOR_LEAGUES = mapOf(
             "4328" to "English Premier League",
             "4331" to "German Bundesliga",
