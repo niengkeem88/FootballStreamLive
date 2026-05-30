@@ -1,5 +1,11 @@
 package keemgames.footballcompanion.domain.model
 
+enum class MatchCategory {
+    LIVE,
+    UPCOMING,
+    COMPLETED
+}
+
 data class Match(
     val id: String,
     val title: String = "",
@@ -19,4 +25,11 @@ data class Match(
     val status: String = "",
     val videoUrl: String? = null,
     val leagueBadge: String? = null
-)
+) {
+    val category: MatchCategory
+        get() = when (status.uppercase()) {
+            "LIVE", "1H", "2H", "HT", "ET", "P", "INT", "SUSP" -> MatchCategory.LIVE
+            "NS" -> MatchCategory.UPCOMING
+            else -> MatchCategory.COMPLETED // FT, AET, ABD, CAN, WO, AWARDED, POSTPONED, etc.
+        }
+}

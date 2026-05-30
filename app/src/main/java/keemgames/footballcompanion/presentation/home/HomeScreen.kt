@@ -3,19 +3,25 @@ package keemgames.footballcompanion.presentation.home
 import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.presentation.components.ads.AdMobBannerAd
 import keemgames.footballcompanion.presentation.components.ads.AdMobInterstitialHelper
 import keemgames.footballcompanion.presentation.components.ads.AdMobNativeAdView
 import keemgames.footballcompanion.presentation.components.vibrant.*
+import keemgames.footballcompanion.presentation.components.LeagueSectionHeader
 import keemgames.footballcompanion.presentation.components.MatchCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToDetails: (String) -> Unit,
@@ -25,13 +31,12 @@ fun HomeScreen(
     val context = LocalContext.current
     val activity = context as? Activity
 
-    // Load interstitial ad on first composition
     val interstitialHelper = remember { AdMobInterstitialHelper() }
     LaunchedEffect(Unit) {
         activity?.let {
             interstitialHelper.loadAd(
                 it,
-                adUnitId = "ca-app-pub-3940256099942544/1033173712" // Test interstitial
+                adUnitId = "ca-app-pub-3940256099942544/1033173712"
             )
         }
     }
@@ -42,17 +47,62 @@ fun HomeScreen(
             subtitle = "The Digital Arena"
         )
 
+        // Tab Row
+        val tabs = listOf("Live", "Upcoming", "Completed")
+        TabRow(
+            selectedTabIndex = state.selectedTab,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.primary
+        ) {
+            tabs.forEachIndexed { index, title ->
+                val isSelected = state.selectedTab == index
+                Tab(
+                    selected = isSelected,
+                    onClick = { viewModel.selectTab(index) },
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = title,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                            val count = when (index) {
+                                0 -> state.liveMatches.size
+                                1 -> state.upcomingMatches.size
+                                2 -> state.completedMatches.size
+                                else -> 0
+                            }
+                            if (count > 0) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    shape = MaterialTheme.shapes.small,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                ) {
+                                    Text(
+                                        text = "$count",
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                                else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
+        // Content
         when {
             state.isLoading -> {
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
 
@@ -62,9 +112,9 @@ fun HomeScreen(
                         .weight(1f)
                         .fillMaxWidth()
                         .padding(32.dp),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = state.error ?: "",
                             color = MaterialTheme.colorScheme.error,
@@ -79,49 +129,80 @@ fun HomeScreen(
             }
 
             else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    // Insert a native ad after every 5 matches
-                    itemsIndexed(state.matches, key = { _, match -> match.id }) { index, match ->
-                        MatchCard(
-                            match = match,
-                            onClick = {
-                                activity?.let { act ->
-                                    interstitialHelper.showAdIfReady(act) {
-                                        onNavigateToDetails(match.id)
-                                    }
-                                } ?: onNavigateToDetails(match.id)
-                            }
-                        )
+                val groupedMatches: Map<String, List<Match>> = when (state.selectedTab) {
+                    0 -> state.groupedLive
+                    1 -> state.groupedUpcoming
+                    2 -> state.groupedCompleted
+                    else -> emptyMap()
+                }
 
-                        // Insert native ad every 5 items
-                        if ((index + 1) % 5 == 0) {
-                            AdMobNativeAdView(
-                                adUnitId = "ca-app-pub-3940256099942544/2247696110", // Test native
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                if (groupedMatches.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val emptyText = when (state.selectedTab) {
+                            0 -> "No live matches right now"
+                            1 -> "No upcoming fixtures"
+                            2 -> "No completed matches"
+                            else -> "No matches found"
                         }
+                        Text(
+                            text = emptyText,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
-
-                    if (state.matches.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                contentAlignment = androidx.compose.ui.Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No matches found",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyLarge
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        groupedMatches.entries.forEachIndexed { leagueIndex, (league, matches) ->
+                            // League header
+                            item(key = "header_$league") {
+                                val badge = matches.firstOrNull()?.leagueBadge
+                                LeagueSectionHeader(
+                                    leagueName = league,
+                                    leagueBadge = badge,
+                                    matchCount = matches.size
                                 )
+                            }
+
+                            // Match cards for this league
+                            items(matches, key = { it.id }) { match ->
+                                MatchCard(
+                                    match = match,
+                                    onClick = {
+                                        activity?.let { act ->
+                                            interstitialHelper.showAdIfReady(act) {
+                                                onNavigateToDetails(match.id)
+                                            }
+                                        } ?: onNavigateToDetails(match.id)
+                                    }
+                                )
+                            }
+
+                            // Native ad after every 6 matches in each league section
+                            // Also native ad after a league section (occasionally)
+                            if (leagueIndex > 0 && leagueIndex % 2 == 0) {
+                                item(key = "native_ad_after_$league") {
+                                    AdMobNativeAdView(
+                                        adUnitId = "ca-app-pub-3940256099942544/2247696110",
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            // Spacer between leagues
+                            item(key = "spacer_after_$league") {
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }

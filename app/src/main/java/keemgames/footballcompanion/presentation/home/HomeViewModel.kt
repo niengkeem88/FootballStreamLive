@@ -28,22 +28,26 @@ class HomeViewModel @Inject constructor(
         getLiveMatchesUseCase().onEach { result ->
             when (result) {
                 is Resource.Success -> {
-                    _state.value = HomeState(
-                        matches = result.data ?: emptyList(),
+                    _state.value = _state.value.copy(
+                        allMatches = result.data ?: emptyList(),
                         isLoading = false,
                         error = null
                     )
                 }
                 is Resource.Error -> {
-                    _state.value = HomeState(
+                    _state.value = _state.value.copy(
                         error = result.message ?: "An unexpected error occurred",
                         isLoading = false
                     )
                 }
                 is Resource.Loading -> {
-                    _state.value = HomeState(isLoading = true)
+                    _state.value = _state.value.copy(isLoading = true)
                 }
             }
         }.launchIn(viewModelScope)
+    }
+
+    fun selectTab(index: Int) {
+        _state.value = _state.value.copy(selectedTab = index)
     }
 }
