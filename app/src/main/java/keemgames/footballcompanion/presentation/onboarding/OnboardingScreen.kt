@@ -1,10 +1,6 @@
 package keemgames.footballcompanion.presentation.onboarding
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -24,13 +20,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import keemgames.footballcompanion.presentation.components.ads.AdMobBannerAd
 import keemgames.footballcompanion.presentation.theme.MidnightNavy
 import keemgames.footballcompanion.presentation.theme.NeonPitchGreen
+import kotlinx.coroutines.launch
 
 data class OnboardingPage(
     val title: String,
     val description: String,
-    val icon: String // Placeholder for icon logic
+    val icon: String
 )
 
 val onboardingPages = listOf(
@@ -97,7 +95,7 @@ fun OnboardingScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
+                    .padding(horizontal = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Pager Indicators
@@ -124,17 +122,19 @@ fun OnboardingScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // CTA Button
                 val isLastPage = pagerState.currentPage == onboardingPages.size - 1
-                
+
                 Button(
                     onClick = {
                         if (isLastPage) {
                             viewModel.completeOnboarding(onFinish)
                         } else {
-                            // Optionally handle Next button
+                            scope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
                         }
                     },
                     modifier = Modifier
@@ -153,6 +153,16 @@ fun OnboardingScreen(
                         fontSize = 16.sp
                     )
                 }
+
+                // Banner ad below the button
+                Spacer(modifier = Modifier.height(16.dp))
+                AdMobBannerAd(
+                    adUnitId = "ca-app-pub-3940256099942544/6300978111",
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Spacer to avoid cutting off the ad at the bottom
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -173,7 +183,9 @@ fun OnboardingContent(page: OnboardingPage) {
                 .size(200.dp)
                 .clip(CircleShape),
             color = Color.White.copy(alpha = 0.05f),
-            border = ButtonDefaults.outlinedButtonBorder.copy(brush = Brush.linearGradient(listOf(NeonPitchGreen, Color.Transparent)))
+            border = ButtonDefaults.outlinedButtonBorder.copy(
+                brush = Brush.linearGradient(listOf(NeonPitchGreen, Color.Transparent))
+            )
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(text = page.icon, fontSize = 80.sp)
