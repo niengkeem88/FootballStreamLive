@@ -24,8 +24,8 @@ fun AdMobBannerAd(
         factory = { ctx ->
             val activity = ctx.findActivity() ?: return@AndroidView AdView(ctx)
             AdView(activity).apply {
-                adUnitId = adUnitId
-                adSize = AdSize.BANNER
+                setAdUnitId(adUnitId)
+                setAdSize(AdSize.BANNER)
                 layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT

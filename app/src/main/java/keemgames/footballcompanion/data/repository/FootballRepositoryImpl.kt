@@ -2,11 +2,12 @@ package keemgames.footballcompanion.data.repository
 
 import keemgames.footballcompanion.data.local.dao.FavoritesDao
 import keemgames.footballcompanion.data.mapper.toFavoriteEntity
-import keemgames.footballcompanion.data.mapper.toMatch as scoreBatToMatch
+import keemgames.footballcompanion.data.mapper.toMatch as favoriteToMatch
 import keemgames.footballcompanion.data.mapper.toEntity
 import keemgames.footballcompanion.data.mapper.toTeam
 import keemgames.footballcompanion.data.mapper.toMatch as theSportsDbToMatch
 import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbApiService
+import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbEventDto
 import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.model.Team
 import keemgames.footballcompanion.domain.repository.FootballRepository
@@ -37,7 +38,9 @@ class FootballRepositoryImpl @Inject constructor(
                                 leagueId = leagueId,
                                 season = TheSportsDbApiService.CURRENT_SEASON
                             )
-                            response.events?.map { it.theSportsDbToMatch() } ?: emptyList()
+                            response.events?.map { event: TheSportsDbEventDto ->
+                                event.theSportsDbToMatch()
+                            } ?: emptyList()
                         } catch (e: Exception) {
                             emptyList<Match>()
                         }
@@ -72,7 +75,9 @@ class FootballRepositoryImpl @Inject constructor(
 
     override fun getFavoriteMatches(): Flow<List<Match>> {
         return dao.getAllFavoriteMatches().map { entities ->
-            entities.map { it.scoreBatToMatch() }
+            entities.map { entity ->
+                entity.favoriteToMatch()
+            }
         }
     }
 
