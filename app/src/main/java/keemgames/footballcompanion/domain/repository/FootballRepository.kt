@@ -7,14 +7,16 @@ import kotlinx.coroutines.flow.Flow
 
 interface FootballRepository {
     fun getLiveMatches(): Flow<Resource<List<Match>>>
-    
+
+    fun getMatchById(matchId: String): Flow<Resource<Match?>>
+
     fun getFavoriteMatches(): Flow<List<Match>>
-    
+
     suspend fun toggleFavoriteMatch(match: Match)
-    
+
     fun getFavoriteTeams(): Flow<List<Team>>
-    
+
     suspend fun toggleFavoriteTeam(team: Team)
-    
+
     fun isMatchFavorite(matchId: String): Flow<Boolean>
 }

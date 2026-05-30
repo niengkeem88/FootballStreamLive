@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import keemgames.footballcompanion.domain.use_case.GetMatchHighlightsUseCase
+import keemgames.footballcompanion.domain.use_case.GetMatchByIdUseCase
 import keemgames.footballcompanion.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MatchDetailsViewModel @Inject constructor(
-    private val getMatchHighlightsUseCase: GetMatchHighlightsUseCase,
+    private val getMatchByIdUseCase: GetMatchByIdUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -23,13 +23,13 @@ class MatchDetailsViewModel @Inject constructor(
     val state: StateFlow<MatchDetailsState> = _state.asStateFlow()
 
     init {
-        savedStateHandle.get<String>("matchUrl")?.let { url ->
-            getMatchDetails(url)
+        savedStateHandle.get<String>("matchUrl")?.let { eventId ->
+            getMatchDetails(eventId)
         }
     }
 
-    private fun getMatchDetails(url: String) {
-        getMatchHighlightsUseCase(url).onEach { result ->
+    private fun getMatchDetails(eventId: String) {
+        getMatchByIdUseCase(eventId).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     _state.value = MatchDetailsState(match = result.data)

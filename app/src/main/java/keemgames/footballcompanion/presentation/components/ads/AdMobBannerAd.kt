@@ -9,12 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.applovin.mediation.MaxAdFormat
-import com.applovin.mediation.ads.MaxAdView
-import com.applovin.sdk.AppLovinSdkUtils
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 
 @Composable
-fun MaxAdaptiveBannerAd(
+fun AdMobBannerAd(
     adUnitId: String,
     modifier: Modifier = Modifier
 ) {
@@ -22,15 +22,15 @@ fun MaxAdaptiveBannerAd(
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
-            val activity = ctx.findActivity() ?: throw IllegalStateException("Context must be an Activity")
-            MaxAdView(adUnitId, activity).apply {
-                val width = ViewGroup.LayoutParams.MATCH_PARENT
-                val heightDp = MaxAdFormat.BANNER.getAdaptiveSize(activity).height
-                val heightPx = AppLovinSdkUtils.dpToPx(activity, heightDp)
-                
-                layoutParams = FrameLayout.LayoutParams(width, heightPx)
-                setExtraParameter("adaptive_banner", "true")
-                loadAd()
+            val activity = ctx.findActivity() ?: return@AndroidView AdView(ctx)
+            AdView(activity).apply {
+                adUnitId = adUnitId
+                adSize = AdSize.BANNER
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                loadAd(AdRequest.Builder().build())
             }
         },
         onRelease = { view ->
@@ -39,7 +39,7 @@ fun MaxAdaptiveBannerAd(
     )
 }
 
-fun Context.findActivity(): Activity? = when (this) {
+private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null

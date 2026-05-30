@@ -29,7 +29,16 @@ fun Match.toFavoriteEntity(): FavoriteMatchEntity {
         competition = competition,
         date = date,
         thumbnail = thumbnail,
-        matchViewUrl = matchViewUrl
+        matchViewUrl = matchViewUrl,
+        homeTeam = homeTeam,
+        awayTeam = awayTeam,
+        homeTeamBadge = homeTeamBadge,
+        awayTeamBadge = awayTeamBadge,
+        homeScore = homeScore,
+        awayScore = awayScore,
+        status = status,
+        videoUrl = videoUrl,
+        leagueBadge = leagueBadge
     )
 }
 
@@ -41,6 +50,15 @@ fun FavoriteMatchEntity.toMatch(): Match {
         date = date,
         thumbnail = thumbnail,
         matchViewUrl = matchViewUrl,
-        isFavorite = true
+        isFavorite = true,
+        homeTeam = homeTeam,
+        awayTeam = awayTeam,
+        homeTeamBadge = homeTeamBadge,
+        awayTeamBadge = awayTeamBadge,
+        homeScore = homeScore,
+        awayScore = awayScore,
+        status = status,
+        videoUrl = videoUrl,
+        leagueBadge = leagueBadge
     )
 }

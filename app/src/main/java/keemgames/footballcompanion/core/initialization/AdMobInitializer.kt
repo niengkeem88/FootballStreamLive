@@ -1,8 +1,9 @@
 package keemgames.footballcompanion.core.initialization
 
 import android.content.Context
-import com.applovin.sdk.AppLovinMediationProvider
-import com.applovin.sdk.AppLovinSdk
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.initialization.InitializationStatus
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,22 +15,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AppLovinInitializer @Inject constructor(
+class AdMobInitializer @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val _isSdkInitialized = MutableStateFlow(false)
-    val isSdkInitialized: StateFlow<Boolean> = _isSdkInitialized.asStateFlow()
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
     fun initialize() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val sdk = AppLovinSdk.getInstance(context)
-                sdk.mediationProvider = AppLovinMediationProvider.MAX
-                sdk.initializeSdk {
-                    _isSdkInitialized.value = true
+                MobileAds.initialize(context) { status: InitializationStatus ->
+                    _isInitialized.value = true
                 }
             } catch (e: Exception) {
-                // Safeguard against crash if SDK key is missing or invalid
                 e.printStackTrace()
             }
         }

@@ -26,14 +26,6 @@ android {
         }
     }
 
-    val localProperties = Properties()
-    val propertiesFile = rootProject.file("local.properties")
-    if (propertiesFile.exists()) {
-        val stream = propertiesFile.inputStream()
-        localProperties.load(stream)
-        stream.close()
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -42,21 +34,17 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            
+
             // Production naming convention
             applicationIdSuffix = ""
             versionNameSuffix = "-release"
-            
-            manifestPlaceholders["applovinSdkKey"] = localProperties.getProperty("APPLOVIN_SDK_KEY", "YOUR_APPLOVIN_SDK_KEY_HERE")
-            
+
             signingConfig = signingConfigs.getByName("debug") // Replace with production key in CI/CD
         }
-        
+
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            
-            manifestPlaceholders["applovinSdkKey"] = localProperties.getProperty("APPLOVIN_SDK_KEY", "YOUR_APPLOVIN_SDK_KEY_HERE")
         }
     }
     compileOptions {
@@ -89,7 +77,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -120,8 +108,8 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
 
-    // AppLovin MAX
-    implementation(libs.applovin.sdk)
+    // Google AdMob
+    implementation("com.google.android.gms:play-services-ads:23.5.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

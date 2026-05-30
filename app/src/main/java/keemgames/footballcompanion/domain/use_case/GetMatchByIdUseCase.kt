@@ -4,16 +4,12 @@ import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.repository.FootballRepository
 import keemgames.footballcompanion.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-/**
- * Fetches match highlights from TheSportsDB via the repository.
- */
-class GetMatchHighlightsUseCase @Inject constructor(
+class GetMatchByIdUseCase @Inject constructor(
     private val repository: FootballRepository
 ) {
-    operator fun invoke(matchUrl: String): Flow<Resource<Match?>> {
-        return repository.getMatchById(matchUrl)
+    operator fun invoke(matchId: String): Flow<Resource<Match?>> {
+        return repository.getMatchById(matchId)
     }
 }

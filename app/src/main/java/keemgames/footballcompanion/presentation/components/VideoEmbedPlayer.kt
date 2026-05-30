@@ -35,24 +35,37 @@ fun VideoEmbedPlayer(
                     mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 }
                 
-                // ScoreBat iframes usually need a specific style to fit the container
+                // Wrap the embed HTML to fit container properly
                 val styledHtml = """
                     <html>
-                        <body style="margin:0;padding:0;background-color:black;">
-                            <div style="width:100%;height:100%;">
+                        <head>
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <style>
+                                * { margin: 0; padding: 0; box-sizing: border-box; }
+                                html, body { width: 100%; height: 100%; background-color: #000; overflow: hidden; }
+                                .embed-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+                                iframe { max-width: 100%; max-height: 100%; border: none; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="embed-container">
                                 $embedHtml
                             </div>
                         </body>
                     </html>
                 """.trimIndent()
                 
-                loadDataWithBaseURL("https://www.scorebat.com", styledHtml, "text/html", "utf-8", null)
+                loadDataWithBaseURL(
+                    "https://www.thesportsdb.com",
+                    styledHtml,
+                    "text/html",
+                    "utf-8",
+                    null
+                )
             }
         },
         modifier = modifier,
-        update = { webView ->
-            // Re-load if embedHtml changes significantly, though factory usually handles first init
-        },
+        update = { },
         onRelease = { webView ->
             webView.apply {
                 stopLoading()

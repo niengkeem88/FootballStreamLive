@@ -21,11 +21,29 @@ class HomeViewModel @Inject constructor(
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     init {
-        // Disabled JSON API fetch to avoid 403 errors; relying on the Widget instead.
-        // getMatches() 
+        getMatches()
     }
 
     fun getMatches() {
-        // Intentionally left empty as we are moving to Widget-only view
+        getLiveMatchesUseCase().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    _state.value = HomeState(
+                        matches = result.data ?: emptyList(),
+                        isLoading = false,
+                        error = null
+                    )
+                }
+                is Resource.Error -> {
+                    _state.value = HomeState(
+                        error = result.message ?: "An unexpected error occurred",
+                        isLoading = false
+                    )
+                }
+                is Resource.Loading -> {
+                    _state.value = HomeState(isLoading = true)
+                }
+            }
+        }.launchIn(viewModelScope)
     }
 }

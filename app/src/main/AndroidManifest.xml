@@ -16,10 +16,10 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/Theme.FootballPulseLive">
 
-        <!-- AppLovin MAX SDK Key (Mandatory for initialization) -->
+        <!-- Google Mobile Ads (AdMob) App ID -->
         <meta-data
-            android:name="applovin.sdk.key"
-            android:value="${applovinSdkKey}" />
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
 
         <activity
             android:name="keemgames.footballcompanion.MainActivity"

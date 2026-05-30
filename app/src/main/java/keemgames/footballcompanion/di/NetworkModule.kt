@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbApiService
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -56,13 +57,17 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        // API-Football widget handles all live data on the client side
-        // This Retrofit instance is kept for future use or other API integrations
+    fun provideTheSportsDbRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://api-sports.io/")
+            .baseUrl(TheSportsDbApiService.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTheSportsDbApiService(retrofit: Retrofit): TheSportsDbApiService {
+        return retrofit.create(TheSportsDbApiService::class.java)
     }
 }
