@@ -1,7 +1,7 @@
 package keemgames.footballcompanion.presentation.match_details
 
-import keemgames.footballcompanion.data.repository.PlayerInfo
-import keemgames.footballcompanion.data.repository.StandingEntry
+import keemgames.footballcompanion.domain.repository.PlayerInfo
+import keemgames.footballcompanion.domain.repository.StandingEntry
 import keemgames.footballcompanion.domain.model.Match
 
 data class MatchDetailsState(
