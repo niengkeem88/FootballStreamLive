@@ -1,7 +1,6 @@
 # Gradle files
 .gradle/
 build/
-gradle/
 
 # Android specific
 *.apk
@@ -24,10 +23,6 @@ local.properties
 
 # Android Studio specific
 .DS_Store
-.gradle
-.gradle/
-local.properties
-.idea/
 .idea/caches
 .idea/modules.xml
 .idea/misc.xml
