@@ -24,7 +24,7 @@ class AdMobInitializer @Inject constructor(
     fun initialize() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                MobileAds.initialize(context) { status: InitializationStatus ->
+                MobileAds.initialize(context) { _: InitializationStatus ->
                     _isInitialized.value = true
                 }
             } catch (e: Exception) {

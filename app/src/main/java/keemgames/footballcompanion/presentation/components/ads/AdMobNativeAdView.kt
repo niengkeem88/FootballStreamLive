@@ -154,7 +154,7 @@ private fun populateNativeAdView(nativeAd: NativeAd, adView: NativeAdView) {
 
     // Media (required for native ad content)
     if (nativeAd.mediaContent != null) {
-        (adView.mediaView as? MediaView)?.setMediaContent(nativeAd.mediaContent!!)
+        adView.mediaView?.setMediaContent(nativeAd.mediaContent!!)
         adView.mediaView?.visibility = View.VISIBLE
     }
 

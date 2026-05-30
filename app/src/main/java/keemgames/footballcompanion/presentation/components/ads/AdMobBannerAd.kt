@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -18,7 +17,6 @@ fun AdMobBannerAd(
     adUnitId: String,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     AndroidView(
         modifier = modifier,
         factory = { ctx ->

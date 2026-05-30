@@ -26,7 +26,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun FootballPulseLiveTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    _: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     // We strictly use the dark theme for the "Midnight Stadium" aesthetic

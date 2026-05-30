@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,29 +29,46 @@ import keemgames.footballcompanion.presentation.components.vibrant.GlassmorphicC
 
 @Composable
 fun MatchDetailsScreen(
-    onNavigateBack: () -> Unit,
+    onNavigateBack: () -> Unit = {},
     viewModel: MatchDetailsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
 
-    // Pre-load rewarded ad for potential use
     val rewardedHelper = remember { AdMobRewardedAdHelper() }
     LaunchedEffect(Unit) {
         activity?.let {
             rewardedHelper.loadAd(
                 it,
-                adUnitId = "ca-app-pub-3940256099942544/5224354917" // Test rewarded
+                adUnitId = "ca-app-pub-3940256099942544/5224354917"
             )
         }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        VibrantHeader(
-            title = state.match?.let { "${it.homeTeam} vs ${it.awayTeam}" } ?: "Match Center",
-            subtitle = state.match?.competition
-        )
+        // Header with back button
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            VibrantHeader(
+                title = state.match?.let { "${it.homeTeam} vs ${it.awayTeam}" } ?: "Match Center",
+                subtitle = state.match?.competition
+            )
+            // Back button overlay
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 32.dp, start = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
 
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -67,7 +85,6 @@ fun MatchDetailsScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Scoreboard card
                     item {
                         GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
                             Column(
@@ -146,7 +163,6 @@ fun MatchDetailsScreen(
                         }
                     }
 
-                    // Video highlights (or rewarded ad prompt)
                     item {
                         if (match.highlights.isNotEmpty()) {
                             GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
@@ -166,7 +182,6 @@ fun MatchDetailsScreen(
                                 }
                             }
                         } else {
-                            // Offer rewarded ad to unlock highlights
                             GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
                                 Column(
                                     modifier = Modifier
@@ -202,7 +217,7 @@ fun MatchDetailsScreen(
                                                     onRewarded = { amount, type ->
                                                         Toast.makeText(
                                                             act,
-                                                            "Thanks! You earned $amount $type. Loading highlights...",
+                                                            "Thanks! You earned $amount $type.",
                                                             Toast.LENGTH_SHORT
                                                         ).show()
                                                     },
@@ -224,7 +239,6 @@ fun MatchDetailsScreen(
                         }
                     }
 
-                    // Match info
                     item {
                         GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(16.dp)) {
