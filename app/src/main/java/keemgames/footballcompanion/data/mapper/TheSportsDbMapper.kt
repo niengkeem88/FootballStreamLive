@@ -11,6 +11,7 @@ fun TheSportsDbEventDto.toMatch(): Match {
         homeTeamId = idHomeTeam ?: "",
         awayTeamId = idAwayTeam ?: "",
         venue = strVenue ?: "",
+        matchTime = strTime ?: "",
         title = strEvent ?: "${strHomeTeam ?: "?"} vs ${strAwayTeam ?: "?"}",
         competition = strLeague ?: "Unknown League",
         date = dateEvent ?: "",

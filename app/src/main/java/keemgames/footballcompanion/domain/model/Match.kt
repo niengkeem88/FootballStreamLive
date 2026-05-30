@@ -28,7 +28,8 @@ data class Match(
     val idLeague: String = "",
     val homeTeamId: String = "",
     val awayTeamId: String = "",
-    val venue: String = ""
+    val venue: String = "",
+    val matchTime: String = "" // e.g. "19:00:00" from strTime
 ) {
     val category: MatchCategory
         get() = when (status.uppercase()) {

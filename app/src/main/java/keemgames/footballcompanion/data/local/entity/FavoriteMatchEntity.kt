@@ -24,5 +24,6 @@ data class FavoriteMatchEntity(
     val idLeague: String = "",
     val homeTeamId: String = "",
     val awayTeamId: String = "",
+    val matchTime: String = "",
     val venue: String = ""
 )

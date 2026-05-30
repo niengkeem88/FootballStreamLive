@@ -26,6 +26,7 @@ import coil.compose.AsyncImage
 import keemgames.footballcompanion.domain.repository.PlayerInfo
 import keemgames.footballcompanion.domain.repository.StandingEntry
 import keemgames.footballcompanion.presentation.components.MatchStatusBadge
+import keemgames.footballcompanion.presentation.components.timer.MatchTimer
 import keemgames.footballcompanion.presentation.components.VideoEmbedPlayer
 import keemgames.footballcompanion.presentation.components.ads.AdMobBannerAd
 import keemgames.footballcompanion.presentation.components.ads.AdMobRewardedAdHelper
@@ -143,6 +144,9 @@ private fun ScoreboardCard(match: keemgames.footballcompanion.domain.model.Match
     GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             MatchStatusBadge(status = match.status)
+            Spacer(modifier = Modifier.height(8.dp))
+            MatchTimer(match = match)
+            Spacer(modifier = Modifier.height(4.dp))
             Spacer(Modifier.height(16.dp))
             Row(
                 Modifier.fillMaxWidth(),

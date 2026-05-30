@@ -4,7 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import keemgames.footballcompanion.domain.model.Match
+import keemgames.footballcompanion.presentation.components.timer.MatchTimer
 
 @Composable
 fun MatchCard(
@@ -39,7 +40,7 @@ fun MatchCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Competition and status row
+            // Competition and timer row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -53,8 +54,13 @@ fun MatchCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                MatchStatusBadge(status = match.status)
+
+                // Live/upcoming timer replaces the simple status badge
+                if (match.category.name == "LIVE" || match.category.name == "UPCOMING") {
+                    MatchTimer(match = match, modifier = Modifier.padding(start = 8.dp))
+                } else {
+                    MatchStatusBadge(status = match.status, modifier = Modifier.padding(start = 8.dp))
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
