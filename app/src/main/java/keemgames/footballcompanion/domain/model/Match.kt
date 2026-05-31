@@ -33,8 +33,8 @@ data class Match(
 ) {
     val category: MatchCategory
         get() = when (status.uppercase()) {
-            "LIVE", "1H", "2H", "HT", "ET", "P", "INT", "SUSP" -> MatchCategory.LIVE
-            "NS" -> MatchCategory.UPCOMING
+            "LIVE", "1H", "FIRST HALF", "2H", "SECOND HALF", "HT", "HALF TIME", "ET", "EXTRA TIME", "P", "PENALTIES", "INT", "INTERRUPTED", "SUSP", "SUSPENDED" -> MatchCategory.LIVE
+            "NS", "NOT STARTED" -> MatchCategory.UPCOMING
             else -> MatchCategory.COMPLETED
         }
 }

@@ -18,8 +18,8 @@ data class MatchTimeDisplay(
 fun computeMatchTimeDisplay(match: Match): MatchTimeDisplay {
     val status = match.status.uppercase()
 
-    // Completed states
-    if (status in listOf("FT", "AET", "ABD", "CAN", "WO", "AWARDED")) {
+    // Completed states - handle both raw API status and mapped status
+    if (status in listOf("FT", "FULL TIME", "AET", "ABD", "CAN", "WO", "AWARDED")) {
         return MatchTimeDisplay(primaryText = "Full Time", isLive = false, progressFraction = 1f)
     }
 
@@ -27,7 +27,7 @@ fun computeMatchTimeDisplay(match: Match): MatchTimeDisplay {
         return MatchTimeDisplay(primaryText = "Postponed", isLive = false)
     }
 
-    if (status == "NS") {
+    if (status == "NS" || status == "NOT STARTED") {
         val matchEpoch = parseMatchEpoch(match)
         if (matchEpoch != null) {
             val now = System.currentTimeMillis()
@@ -52,8 +52,8 @@ fun computeMatchTimeDisplay(match: Match): MatchTimeDisplay {
         return MatchTimeDisplay(primaryText = "Not Started", isLive = false)
     }
 
-    // Live states
-    if (status in listOf("1H", "2H", "HT", "ET", "P", "LIVE", "INT", "SUSP")) {
+    // Live states - handle both raw API status and mapped status
+    if (status in listOf("1H", "FIRST HALF", "2H", "SECOND HALF", "HT", "HALF TIME", "ET", "EXTRA TIME", "P", "PENALTIES", "LIVE", "INT", "INTERRUPTED", "SUSP", "SUSPENDED")) {
         val matchEpoch = parseMatchEpoch(match)
         if (matchEpoch != null) {
             val now = System.currentTimeMillis()
@@ -62,32 +62,32 @@ fun computeMatchTimeDisplay(match: Match): MatchTimeDisplay {
                 val elapsedMinutes = (elapsed / 60000).toInt()
 
                 when (status) {
-                    "HT" -> return MatchTimeDisplay(
+                    "HT", "HALF TIME" -> return MatchTimeDisplay(
                         primaryText = "Half Time", secondaryText = "${elapsedMinutes}m elapsed",
                         isLive = true, progressFraction = 0.5f
                     )
-                    "1H" -> {
+                    "1H", "FIRST HALF" -> {
                         val mins = elapsedMinutes.coerceAtMost(45)
                         return MatchTimeDisplay(
                             primaryText = "${mins}'", secondaryText = "1st Half",
                             isLive = true, progressFraction = mins.toFloat() / 45f
                         )
                     }
-                    "2H" -> {
+                    "2H", "SECOND HALF" -> {
                         val mins = (elapsedMinutes - 15).coerceIn(0, 45)
                         return MatchTimeDisplay(
                             primaryText = "${45 + mins}'", secondaryText = "2nd Half",
                             isLive = true, progressFraction = (45f + mins.toFloat()) / 90f
                         )
                     }
-                    "ET" -> {
+                    "ET", "EXTRA TIME" -> {
                         val mins = elapsedMinutes.coerceAtMost(30)
                         return MatchTimeDisplay(
                             primaryText = "${90 + mins}'", secondaryText = "Extra Time",
                             isLive = true, progressFraction = 0.85f + mins.toFloat() / 60f
                         )
                     }
-                    "P" -> return MatchTimeDisplay(
+                    "P", "PENALTIES" -> return MatchTimeDisplay(
                         primaryText = "Penalties", secondaryText = "${elapsedMinutes}m elapsed",
                         isLive = true, progressFraction = 1f
                     )

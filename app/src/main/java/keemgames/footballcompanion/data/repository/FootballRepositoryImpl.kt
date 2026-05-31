@@ -7,17 +7,13 @@ import keemgames.footballcompanion.data.mapper.toEntity
 import keemgames.footballcompanion.data.mapper.toTeam
 import keemgames.footballcompanion.data.mapper.toMatch as theSportsDbToMatch
 import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbApiService
-import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbEventDto
 import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.model.Team
 import keemgames.footballcompanion.domain.repository.FootballRepository
 import keemgames.footballcompanion.domain.repository.PlayerInfo
 import keemgames.footballcompanion.domain.repository.StandingEntry
 import keemgames.footballcompanion.domain.util.Resource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.supervisorScope
 import javax.inject.Inject
 
 class FootballRepositoryImpl @Inject constructor(
@@ -29,19 +25,18 @@ class FootballRepositoryImpl @Inject constructor(
         emit(Resource.Loading())
         try {
             val matches = mutableListOf<Match>()
-            supervisorScope {
-                val deferredResults = TheSportsDbApiService.MAJOR_LEAGUES.keys.map { leagueId ->
-                    async(Dispatchers.IO) {
-                        try {
-                            val response = theSportsDbApi.getLatestEvents(
-                                leagueId = leagueId,
-                                season = TheSportsDbApiService.CURRENT_SEASON
-                            )
-                            response.events?.map { event: TheSportsDbEventDto -> event.theSportsDbToMatch() } ?: emptyList()
-                        } catch (e: Exception) { emptyList<Match>() }
+            for (leagueId in TheSportsDbApiService.MAJOR_LEAGUES.keys) {
+                try {
+                    val response = theSportsDbApi.getLatestEvents(
+                        leagueId = leagueId,
+                        season = TheSportsDbApiService.CURRENT_SEASON
+                    )
+                    response.events?.forEach { event ->
+                        matches.add(event.theSportsDbToMatch())
                     }
+                } catch (e: Exception) {
+                    android.util.Log.w("FootballRepo", "Failed to load league " + leagueId + ": " + e.message)
                 }
-                deferredResults.forEach { matches.addAll(it.await()) }
             }
             matches.sortByDescending { it.date }
             emit(Resource.Success(matches))

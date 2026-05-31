@@ -160,11 +160,12 @@ fun MatchStatusBadge(
     modifier: Modifier = Modifier
 ) {
     val color = when (status.uppercase()) {
-        "LIVE", "1H", "2H" -> Color(0xFF4CAF50)
+        "LIVE", "1H", "FIRST HALF", "2H", "SECOND HALF" -> Color(0xFF4CAF50)
         "HALF TIME", "HT" -> Color(0xFFFF9800)
-        "FULL TIME", "FT" -> Color(0xFF9E9E9E)
+        "FULL TIME", "FT", "AET", "ABD", "CAN", "WO", "AWARDED" -> Color(0xFF9E9E9E)
         "NOT STARTED", "NS" -> MaterialTheme.colorScheme.primary
         "POSTPONED" -> Color(0xFFF44336)
+        "ET", "EXTRA TIME", "P", "PENALTIES" -> Color(0xFFFF9800)
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
