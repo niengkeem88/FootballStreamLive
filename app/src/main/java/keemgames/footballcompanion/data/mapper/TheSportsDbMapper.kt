@@ -1,6 +1,7 @@
 package keemgames.footballcompanion.data.mapper
 
 import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbEventDto
+import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbTopScorerDto
 import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.model.VideoHighlight
 

@@ -6,6 +6,7 @@ import keemgames.footballcompanion.data.mapper.toMatch as favoriteToMatch
 import keemgames.footballcompanion.data.mapper.toEntity
 import keemgames.footballcompanion.data.mapper.toTeam
 import keemgames.footballcompanion.data.mapper.toMatch as theSportsDbToMatch
+import keemgames.footballcompanion.data.mapper.toTopScorer
 import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbApiService
 import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.model.Team
