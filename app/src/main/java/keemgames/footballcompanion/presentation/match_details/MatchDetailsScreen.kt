@@ -44,8 +44,12 @@ fun MatchDetailsScreen(
     val activity = context as? Activity
 
     val rewardedHelper = remember { AdMobRewardedAdHelper() }
+    val interstitialHelper = remember { keemgames.footballcompanion.presentation.components.ads.AdMobInterstitialHelper() }
     LaunchedEffect(Unit) {
-        activity?.let { rewardedHelper.loadAd(it, "ca-app-pub-3940256099942544/5224354917") }
+        activity?.let {
+            rewardedHelper.loadAd(it, "ca-app-pub-3940256099942544/5224354917")
+            interstitialHelper.loadAd(it, "ca-app-pub-3940256099942544/1033173712")
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -84,7 +88,15 @@ fun MatchDetailsScreen(
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = state.selectedTab == index,
-                            onClick = { viewModel.selectTab(index) },
+                            onClick = {
+                                if (index != state.selectedTab) {
+                                    activity?.let { act ->
+                                        interstitialHelper.showAdIfReady(act) {
+                                            viewModel.selectTab(index)
+                                        }
+                                    } ?: viewModel.selectTab(index)
+                                }
+                            },
                             text = {
                                 Text(
                                     title,
