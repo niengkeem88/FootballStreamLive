@@ -47,6 +47,11 @@ val onboardingPages = listOf(
         title = "PERSONALIZED ALERTS",
         description = "Never miss a beat. Get tailored notifications for your favorite teams and competitions.",
         icon = "🔔"
+    ),
+    OnboardingPage(
+        title = "TERMS & CONDITIONS",
+        description = "By continuing you agree to our Terms of Service and Privacy Policy. Live scores, highlights, and streaming are provided for personal use only.",
+        icon = "📜"
     )
 )
 
@@ -61,8 +66,16 @@ fun OnboardingScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val activity = context as? android.app.Activity
     val interstitialHelper = remember { AdMobInterstitialHelper() }
+    // Load interstitial ad on entry
     LaunchedEffect(Unit) {
         activity?.let { interstitialHelper.loadAd(it, "ca-app-pub-3940256099942544/1033173712") }
+    }
+
+    // Reload interstitial ad after each page change so it's ready for the next click
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage > 0) {
+            activity?.let { interstitialHelper.loadAd(it, "ca-app-pub-3940256099942544/1033173712") }
+        }
     }
 
     Box(
@@ -131,8 +144,31 @@ fun OnboardingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Terms checkbox (only visible on last page)
+                var termsAccepted by remember { mutableStateOf(false) }
+                if (pagerState.currentPage == onboardingPages.size - 1) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = termsAccepted,
+                            onCheckedChange = { termsAccepted = it },
+                            colors = CheckboxDefaults.colors(checkedColor = NeonPitchGreen)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "I accept the Terms & Privacy Policy",
+                            color = Color.White.copy(alpha = 0.8f),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+
                 // CTA Button
                 val isLastPage = pagerState.currentPage == onboardingPages.size - 1
+                val buttonEnabled = !isLastPage || termsAccepted
 
                 Button(
                     onClick = {
@@ -143,6 +179,7 @@ fun OnboardingScreen(
                                 }
                             } ?: viewModel.completeOnboarding(onFinish)
                         } else {
+                            // Show interstitial ad, then advance to next page
                             activity?.let { act ->
                                 interstitialHelper.showAdIfReady(act) {
                                     scope.launch {
@@ -154,12 +191,15 @@ fun OnboardingScreen(
                             }
                         }
                     },
+                    enabled = buttonEnabled,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isLastPage) NeonPitchGreen else Color.Transparent,
-                        contentColor = if (isLastPage) MidnightNavy else Color.White
+                        contentColor = if (isLastPage) MidnightNavy else Color.White,
+                        disabledContainerColor = Color.Gray.copy(alpha = 0.3f),
+                        disabledContentColor = Color.Gray.copy(alpha = 0.5f)
                     ),
                     shape = RoundedCornerShape(12.dp),
                     border = if (isLastPage) null else ButtonDefaults.outlinedButtonBorder
