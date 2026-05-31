@@ -28,10 +28,18 @@ class HomeViewModel @Inject constructor(
         getLiveMatchesUseCase().onEach { result ->
             when (result) {
                 is Resource.Success -> {
+                    val matches = result.data ?: emptyList()
+                    // Auto-select best tab: Live > Upcoming > Completed
+                    val initialTab = when {
+                        matches.any { it.category.name == "LIVE" } -> 0
+                        matches.any { it.category.name == "UPCOMING" } -> 1
+                        else -> 2
+                    }
                     _state.value = _state.value.copy(
-                        allMatches = result.data ?: emptyList(),
+                        allMatches = matches,
                         isLoading = false,
-                        error = null
+                        error = null,
+                        selectedTab = initialTab
                     )
                 }
                 is Resource.Error -> {

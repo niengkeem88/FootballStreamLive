@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -59,7 +59,7 @@ fun MatchDetailsScreen(
                 onClick = onNavigateBack,
                 modifier = Modifier.align(Alignment.TopStart).padding(top = 32.dp, start = 8.dp)
             ) {
-                Icon(Icons.Default.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onPrimary)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
 
@@ -96,7 +96,7 @@ fun MatchDetailsScreen(
                 }
 
                 when (state.selectedTab) {
-                    0 -> OverviewTab(match, state, rewardedHelper, activity)
+                    0 -> OverviewTab(match, rewardedHelper, activity)
                     1 -> LineupsTab(state.homePlayers, state.awayPlayers, match, state.playersLoading)
                     2 -> StandingsTab(state.standings, state.standingsLoading)
                     3 -> StatsTab(match)
@@ -341,12 +341,12 @@ private fun PlayerRow(player: PlayerInfo) {
             Column(Modifier.weight(1f)) {
                 Text(player.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                 if (!player.position.isNullOrBlank()) {
-                    Text(player.position!!, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(player.position, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
             if (!player.nationality.isNullOrBlank()) {
-                Text(player.nationality!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(player.nationality, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

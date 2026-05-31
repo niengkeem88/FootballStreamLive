@@ -56,7 +56,7 @@ fun MatchCard(
                 )
 
                 // Live/upcoming timer replaces the simple status badge
-                if (match.category.name == "LIVE" || match.category.name == "UPCOMING") {
+                if (match.category == keemgames.footballcompanion.domain.model.MatchCategory.LIVE || match.category == keemgames.footballcompanion.domain.model.MatchCategory.UPCOMING) {
                     MatchTimer(match = match, modifier = Modifier.padding(start = 8.dp))
                 } else {
                     MatchStatusBadge(status = match.status, modifier = Modifier.padding(start = 8.dp))
