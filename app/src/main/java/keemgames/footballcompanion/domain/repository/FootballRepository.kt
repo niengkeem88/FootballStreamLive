@@ -30,13 +30,13 @@ data class PlayerInfo(
 )
 
 interface FootballRepository {
-    fun getLiveMatches(): Flow<Resource<List<Match>>>
+    suspend fun getLiveMatches(): Resource<List<Match>>
 
-    fun getMatchById(matchId: String): Flow<Resource<Match?>>
+    suspend fun getMatchById(matchId: String): Resource<Match?>
 
-    fun getStandings(leagueId: String): Flow<Resource<List<StandingEntry>>>
+    suspend fun getStandings(leagueId: String): Resource<List<StandingEntry>>
 
-    fun getTeamPlayers(teamId: String): Flow<Resource<List<PlayerInfo>>>
+    suspend fun getTeamPlayers(teamId: String): Resource<List<PlayerInfo>>
 
     fun getFavoriteMatches(): Flow<List<Match>>
 

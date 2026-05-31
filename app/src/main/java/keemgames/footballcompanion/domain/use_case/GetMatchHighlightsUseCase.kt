@@ -3,8 +3,6 @@ package keemgames.footballcompanion.domain.use_case
 import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.repository.FootballRepository
 import keemgames.footballcompanion.domain.util.Resource
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
@@ -13,7 +11,7 @@ import javax.inject.Inject
 class GetMatchHighlightsUseCase @Inject constructor(
     private val repository: FootballRepository
 ) {
-    operator fun invoke(matchUrl: String): Flow<Resource<Match?>> {
+    suspend operator fun invoke(matchUrl: String): Resource<Match?> {
         return repository.getMatchById(matchUrl)
     }
 }

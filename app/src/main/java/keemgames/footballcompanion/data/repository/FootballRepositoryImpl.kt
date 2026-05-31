@@ -13,7 +13,11 @@ import keemgames.footballcompanion.domain.repository.FootballRepository
 import keemgames.footballcompanion.domain.repository.PlayerInfo
 import keemgames.footballcompanion.domain.repository.StandingEntry
 import keemgames.footballcompanion.domain.util.Resource
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FootballRepositoryImpl @Inject constructor(
@@ -21,8 +25,7 @@ class FootballRepositoryImpl @Inject constructor(
     private val theSportsDbApi: TheSportsDbApiService
 ) : FootballRepository {
 
-    override fun getLiveMatches(): Flow<Resource<List<Match>>> = flow {
-        emit(Resource.Loading())
+    override suspend fun getLiveMatches(): Resource<List<Match>> = withContext(Dispatchers.IO) {
         try {
             val matches = mutableListOf<Match>()
             for (leagueId in TheSportsDbApiService.MAJOR_LEAGUES.keys) {
@@ -35,29 +38,27 @@ class FootballRepositoryImpl @Inject constructor(
                         matches.add(event.theSportsDbToMatch())
                     }
                 } catch (e: Exception) {
-                    android.util.Log.w("FootballRepo", "Failed to load league " + leagueId + ": " + e.message)
+                    android.util.Log.w("FootballRepo", "Failed to load league $leagueId: ${e.message}")
                 }
             }
             matches.sortByDescending { it.date }
-            emit(Resource.Success(matches))
+            Resource.Success(matches)
         } catch (e: Exception) {
-            emit(Resource.Error("Oops, something went wrong: ${e.message}"))
+            Resource.Error("Oops, something went wrong: ${e.message}")
         }
     }
 
-    override fun getMatchById(matchId: String): Flow<Resource<Match?>> = flow {
-        emit(Resource.Loading())
+    override suspend fun getMatchById(matchId: String): Resource<Match?> = withContext(Dispatchers.IO) {
         try {
             val response = theSportsDbApi.getEventById(matchId)
             val match = response.events?.firstOrNull()?.theSportsDbToMatch()
-            emit(Resource.Success(match))
+            Resource.Success(match)
         } catch (e: Exception) {
-            emit(Resource.Error("Failed to load match: ${e.message}"))
+            Resource.Error("Failed to load match: ${e.message}")
         }
     }
 
-    override fun getStandings(leagueId: String): Flow<Resource<List<StandingEntry>>> = flow {
-        emit(Resource.Loading())
+    override suspend fun getStandings(leagueId: String): Resource<List<StandingEntry>> = withContext(Dispatchers.IO) {
         try {
             val response = theSportsDbApi.getStandings(leagueId)
             val entries = response.table?.mapNotNull { row ->
@@ -78,14 +79,13 @@ class FootballRepositoryImpl @Inject constructor(
                     )
                 }
             } ?: emptyList()
-            emit(Resource.Success(entries))
+            Resource.Success(entries)
         } catch (e: Exception) {
-            emit(Resource.Error("Failed to load standings: ${e.message}"))
+            Resource.Error("Failed to load standings: ${e.message}")
         }
     }
 
-    override fun getTeamPlayers(teamId: String): Flow<Resource<List<PlayerInfo>>> = flow {
-        emit(Resource.Loading())
+    override suspend fun getTeamPlayers(teamId: String): Resource<List<PlayerInfo>> = withContext(Dispatchers.IO) {
         try {
             val response = theSportsDbApi.getTeamPlayers(teamId)
             val players = response.player?.map { p ->
@@ -98,9 +98,9 @@ class FootballRepositoryImpl @Inject constructor(
                     number = p.strNumber
                 )
             } ?: emptyList()
-            emit(Resource.Success(players))
+            Resource.Success(players)
         } catch (e: Exception) {
-            emit(Resource.Error("Failed to load players: ${e.message}"))
+            Resource.Error("Failed to load players: ${e.message}")
         }
     }
 

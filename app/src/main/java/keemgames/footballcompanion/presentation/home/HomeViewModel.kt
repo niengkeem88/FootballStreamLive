@@ -8,8 +8,7 @@ import keemgames.footballcompanion.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,11 +24,12 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getMatches() {
-        getLiveMatchesUseCase().onEach { result ->
+        _state.value = _state.value.copy(isLoading = true)
+        viewModelScope.launch {
+            val result = getLiveMatchesUseCase()
             when (result) {
                 is Resource.Success -> {
                     val matches = result.data ?: emptyList()
-                    // Auto-select best tab: Live > Upcoming > Completed
                     val initialTab = when {
                         matches.any { it.category.name == "LIVE" } -> 0
                         matches.any { it.category.name == "UPCOMING" } -> 1
@@ -52,7 +52,7 @@ class HomeViewModel @Inject constructor(
                     _state.value = _state.value.copy(isLoading = true)
                 }
             }
-        }.launchIn(viewModelScope)
+        }
     }
 
     fun selectTab(index: Int) {
