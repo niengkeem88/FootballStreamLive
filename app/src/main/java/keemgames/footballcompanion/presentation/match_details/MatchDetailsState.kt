@@ -1,8 +1,9 @@
 package keemgames.footballcompanion.presentation.match_details
 
+import keemgames.footballcompanion.domain.model.Match
+import keemgames.footballcompanion.domain.model.TopScorer
 import keemgames.footballcompanion.domain.repository.PlayerInfo
 import keemgames.footballcompanion.domain.repository.StandingEntry
-import keemgames.footballcompanion.domain.model.Match
 
 data class MatchDetailsState(
     val isLoading: Boolean = false,
@@ -15,5 +16,7 @@ data class MatchDetailsState(
     val standingsLoading: Boolean = false,
     val playersLoading: Boolean = false,
     val headToHead: List<Match> = emptyList(),
-    val headToHeadLoading: Boolean = false
+    val headToHeadLoading: Boolean = false,
+    val topScorers: List<TopScorer> = emptyList(),
+    val topScorersLoading: Boolean = false
 )

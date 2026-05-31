@@ -41,6 +41,7 @@ class MatchDetailsViewModel @Inject constructor(
                         if (m.idLeague.isNotBlank()) loadStandings(m.idLeague)
                         if (m.homeTeamId.isNotBlank() || m.awayTeamId.isNotBlank()) loadPlayers(m)
                         if (m.homeTeamId.isNotBlank() && m.awayTeamId.isNotBlank()) loadHeadToHead(m.homeTeamId, m.awayTeamId)
+                        if (m.idLeague.isNotBlank()) loadTopScorers(m.idLeague)
                     }
                 }
                 is Resource.Error -> {
@@ -98,6 +99,22 @@ class MatchDetailsViewModel @Inject constructor(
             }
 
             _state.value = _state.value.copy(playersLoading = false)
+        }
+    }
+
+    private fun loadTopScorers(leagueId: String) {
+        _state.value = _state.value.copy(topScorersLoading = true)
+        viewModelScope.launch {
+            val result = footballRepository.getTopScorers(leagueId)
+            when (result) {
+                is Resource.Success -> {
+                    _state.value = _state.value.copy(topScorers = result.data ?: emptyList(), topScorersLoading = false)
+                }
+                is Resource.Error -> {
+                    _state.value = _state.value.copy(topScorersLoading = false)
+                }
+                is Resource.Loading -> { /* no-op */ }
+            }
         }
     }
 

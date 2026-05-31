@@ -38,3 +38,21 @@ data class Match(
             else -> MatchCategory.COMPLETED
         }
 }
+
+/**
+ * Represents a top scorer or player stat entry for a league.
+ * goalCount may be 0 when using the test API key which doesn't include
+ * individual goal data — full stats require a premium TheSportsDB key.
+ */
+data class TopScorer(
+    val id: String,
+    val name: String,
+    val teamName: String,
+    val teamBadge: String? = null,
+    val position: String? = null,
+    val nationality: String? = null,
+    val thumb: String? = null,
+    val number: String? = null,
+    val goalCount: Int = 0,
+    val rank: Int = 0
+)

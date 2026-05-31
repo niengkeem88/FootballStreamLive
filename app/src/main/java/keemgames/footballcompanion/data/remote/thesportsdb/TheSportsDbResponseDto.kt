@@ -130,6 +130,36 @@ data class TheSportsDbLastEventsResponse(
     val results: List<TheSportsDbEventDto>? = null
 )
 
+// -- Top Scorers --
+
+data class TheSportsDbTopScorersResponse(
+    @SerializedName("topscorers")
+    val topScorers: List<TheSportsDbTopScorerDto>? = null
+)
+
+data class TheSportsDbTopScorerDto(
+    @SerializedName("idPlayer")
+    val idPlayer: String? = null,
+    @SerializedName("strPlayer")
+    val strPlayer: String? = null,
+    @SerializedName("strTeam")
+    val strTeam: String? = null,
+    @SerializedName("strBadge")
+    val strBadge: String? = null,
+    @SerializedName("strPosition")
+    val strPosition: String? = null,
+    @SerializedName("strNationality")
+    val strNationality: String? = null,
+    @SerializedName("strThumb")
+    val strThumb: String? = null,
+    @SerializedName("intGoals")
+    val intGoals: String? = null,
+    @SerializedName("strNumber")
+    val strNumber: String? = null,
+    @SerializedName("intRank")
+    val intRank: String? = null
+)
+
 // -- Players --
 
 data class TheSportsDbPlayersResponse(

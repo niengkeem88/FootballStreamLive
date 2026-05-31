@@ -49,6 +49,11 @@ interface TheSportsDbApiService {
         @Query("id") teamId: String
     ): TheSportsDbPlayersResponse
 
+    @GET("lookuptopscorers.php")
+    suspend fun getTopScorers(
+        @Query("l") leagueId: String
+    ): TheSportsDbTopScorersResponse
+
     companion object {
         const val BASE_URL = "https://www.thesportsdb.com/api/v1/json/3/"
         const val DEFAULT_API_KEY = "3"

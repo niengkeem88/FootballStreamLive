@@ -74,7 +74,7 @@ fun MatchDetailsScreen(
         } else {
             state.match?.let { match ->
                 // Tab Row
-                val tabs = listOf("Overview", "Lineups", "Standings", "Stats", "H2H")
+                val tabs = listOf("Overview", "Lineups", "Standings", "Top Scorers", "H2H")
                 TabRow(
                     selectedTabIndex = state.selectedTab,
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -99,7 +99,7 @@ fun MatchDetailsScreen(
                     0 -> OverviewTab(match, rewardedHelper, activity)
                     1 -> LineupsTab(state.homePlayers, state.awayPlayers, match, state.playersLoading)
                     2 -> StandingsTab(state.standings, state.standingsLoading)
-                    3 -> StatsTab(match)
+                    3 -> TopScorersTab(state.topScorers, state.topScorersLoading)
                     4 -> HeadToHeadTab(state.headToHead, state.headToHeadLoading)
                 }
             }
@@ -586,10 +586,36 @@ private fun H2HMatchCard(match: keemgames.footballcompanion.domain.model.Match) 
     }
 }
 
-// ====================== STATS TAB ======================
+// ====================== TOP SCORERS TAB ======================
 
 @Composable
-private fun StatsTab(match: keemgames.footballcompanion.domain.model.Match) {
+private fun TopScorersTab(
+    topScorers: List<keemgames.footballcompanion.domain.model.TopScorer>,
+    isLoading: Boolean
+) {
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        return
+    }
+
+    if (topScorers.isEmpty()) {
+        Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+            Text(
+                "No player data available.
+Upgrade to a premium TheSportsDB key for full stats.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+        }
+        return
+    }
+
+    // Group by team
+    val groupedByTeam = topScorers.groupBy { it.teamName }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -598,45 +624,128 @@ private fun StatsTab(match: keemgames.footballcompanion.domain.model.Match) {
         item {
             GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("Match Statistics", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.height(16.dp))
-
-                    StatRow("Score", "${match.homeScore ?: "-"} : ${match.awayScore ?: "-"}")
-                    StatRow("Competition", match.competition)
-                    StatRow("Status", match.status)
-                    StatRow("Date", match.date)
-                    if (match.venue.isNotBlank()) StatRow("Venue", match.venue)
-                    StatRow("Home Team", match.homeTeam)
-                    StatRow("Away Team", match.awayTeam)
+                    Text(
+                        "Players & Squad",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "${topScorers.size} players across ${groupedByTeam.size} teams",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
 
-        // Banner ad at the bottom of stats
-        item {
-            AdMobBannerAd(
-                adUnitId = "ca-app-pub-3940256099942544/6300978111",
-                modifier = Modifier.fillMaxWidth()
-            )
+        groupedByTeam.entries.forEach { (teamName, players) ->
+            item(key = "team_header_$teamName") {
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val badge = players.firstOrNull()?.teamBadge
+                    if (!badge.isNullOrBlank()) {
+                        AsyncImage(
+                            model = badge,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp).clip(RoundedCornerShape(4.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    Text(
+                        teamName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "${players.size} players",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            items(players) { scorer ->
+                PlayerStatCard(scorer = scorer)
+            }
         }
     }
 }
 
 @Composable
-private fun StatRow(label: String, value: String) {
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-        Text(value, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
-    }
-}
+private fun PlayerStatCard(scorer: keemgames.footballcompanion.domain.model.TopScorer) {
+    GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Rank badge
+            val rankColor = when {
+                scorer.rank <= 5 -> MaterialTheme.colorScheme.primary
+                scorer.rank <= 15 -> MaterialTheme.colorScheme.secondary
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            }
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = rankColor.copy(alpha = 0.15f)
+            ) {
+                Text(
+                    "${scorer.rank}",
+                    Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = rankColor,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
 
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(12.dp))
+
+            // Player thumbnail
+            if (!scorer.thumb.isNullOrBlank()) {
+                AsyncImage(
+                    model = scorer.thumb,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(Modifier.width(12.dp))
+            }
+
+            // Player info
+            Column(Modifier.weight(1f)) {
+                Text(
+                    scorer.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1
+                )
+                Row {
+                    scorer.position?.let { pos ->
+                        Text(pos, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    scorer.number?.let { num ->
+                        if (num.isNotBlank()) {
+                            Text(" • #$num", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+
+            // Nationality
+            scorer.nationality?.let { nat ->
+                if (nat.isNotBlank()) {
+                    Text(
+                        nat.take(3).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
     }
 }

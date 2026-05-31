@@ -37,6 +37,21 @@ fun TheSportsDbEventDto.toMatch(): Match {
     )
 }
 
+fun TheSportsDbTopScorerDto.toTopScorer(): keemgames.footballcompanion.domain.model.TopScorer {
+    return keemgames.footballcompanion.domain.model.TopScorer(
+        id = idPlayer ?: "",
+        name = strPlayer ?: "Unknown",
+        teamName = strTeam ?: "",
+        teamBadge = strBadge,
+        position = strPosition,
+        nationality = strNationality,
+        thumb = strThumb,
+        number = strNumber,
+        goalCount = intGoals?.toIntOrNull() ?: 0,
+        rank = intRank?.toIntOrNull() ?: 0
+    )
+}
+
 private fun resolveStatus(status: String?, postponed: String?): String {
     if (postponed == "yes") return "Postponed"
     return when (status?.uppercase()) {

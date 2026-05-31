@@ -9,6 +9,7 @@ import keemgames.footballcompanion.data.mapper.toMatch as theSportsDbToMatch
 import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbApiService
 import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.model.Team
+import keemgames.footballcompanion.domain.model.TopScorer
 import keemgames.footballcompanion.domain.repository.FootballRepository
 import keemgames.footballcompanion.domain.repository.PlayerInfo
 import keemgames.footballcompanion.domain.repository.StandingEntry
@@ -125,6 +126,53 @@ class FootballRepositoryImpl @Inject constructor(
             Resource.Success(h2h)
         } catch (e: Exception) {
             Resource.Error("Failed to load head-to-head: ${e.message}")
+        }
+    }
+
+    override suspend fun getTopScorers(leagueId: String): Resource<List<TopScorer>> = withContext(Dispatchers.IO) {
+        try {
+            // Try the dedicated API endpoint first
+            val response = theSportsDbApi.getTopScorers(leagueId)
+            val apiScorers = response.topScorers
+            if (!apiScorers.isNullOrEmpty()) {
+                return@withContext Resource.Success(
+                    apiScorers.map { it.toTopScorer() }
+                )
+            }
+
+            // Fallback: build from standings teams + players
+            val standingsResponse = theSportsDbApi.getStandings(leagueId)
+            val teams = standingsResponse.table.orEmpty()
+
+            var rank = 0
+            val scorers = mutableListOf<TopScorer>()
+            for (team in teams) {
+                val teamId = team.idTeam ?: continue
+                try {
+                    val playersResponse = theSportsDbApi.getTeamPlayers(teamId)
+                    playersResponse.player?.forEach { p ->
+                        rank++
+                        scorers.add(
+                            TopScorer(
+                                id = p.idPlayer ?: "player_$rank",
+                                name = p.strPlayer ?: "Unknown",
+                                teamName = team.strTeam ?: "",
+                                teamBadge = team.strBadge,
+                                position = p.strPosition,
+                                nationality = p.strNationality,
+                                thumb = p.strThumb,
+                                number = p.strNumber,
+                                goalCount = 0,
+                                rank = rank
+                            )
+                        )
+                    }
+                } catch (_: Exception) { /* skip team if player fetch fails */ }
+            }
+
+            Resource.Success(scorers)
+        } catch (e: Exception) {
+            Resource.Error("Failed to load top scorers: ${e.message}")
         }
     }
 
