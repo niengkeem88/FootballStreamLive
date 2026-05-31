@@ -42,6 +42,10 @@ interface FootballRepository {
 
     suspend fun getTopScorers(leagueId: String): Resource<List<keemgames.footballcompanion.domain.model.TopScorer>>
 
+    suspend fun getLeagueDescription(leagueId: String, langSuffix: String): Resource<String>
+
+    suspend fun getTeamDescription(teamId: String, langSuffix: String): Resource<String>
+
     fun getFavoriteMatches(): Flow<List<Match>>
 
     suspend fun toggleFavoriteMatch(match: Match)

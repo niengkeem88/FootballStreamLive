@@ -10,6 +10,7 @@ class PreferencesRepositoryImpl @Inject constructor(
 ) : PreferencesRepository {
     override val themeModeFlow: Flow<String> = appPreferences.themeModeFlow
     override val onboardingCompletedFlow: Flow<Boolean> = appPreferences.onboardingCompletedFlow
+    override val selectedLanguageFlow: Flow<String> = appPreferences.selectedLanguageFlow
 
     override suspend fun updateThemeMode(mode: String) {
         appPreferences.updateThemeMode(mode)
@@ -21,5 +22,9 @@ class PreferencesRepositoryImpl @Inject constructor(
 
     override suspend fun updateSelectedRegion(region: String) {
         appPreferences.updateSelectedRegion(region)
+    }
+
+    override suspend fun setSelectedLanguage(languageCode: String) {
+        appPreferences.setSelectedLanguage(languageCode)
     }
 }

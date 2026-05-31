@@ -23,6 +23,11 @@ interface TheSportsDbApiService {
         @Query("id") eventId: String
     ): TheSportsDbEventsResponse
 
+    @GET("searchteams.php")
+    suspend fun searchTeam(
+        @Query("t") teamName: String
+    ): TheSportsDbTeamResponse
+
     @GET("eventsnext.php")
     suspend fun getNextEventsByTeam(
         @Query("id") teamId: String
@@ -33,10 +38,15 @@ interface TheSportsDbApiService {
         @Query("id") teamId: String
     ): TheSportsDbLastEventsResponse
 
+    @GET("lookupteam.php")
+    suspend fun getTeamById(
+        @Query("id") teamId: String
+    ): TheSportsDbTeamResponse
+
     @GET("lookupleague.php")
     suspend fun getLeagueById(
         @Query("id") leagueId: String
-    ): TheSportsDbEventsResponse
+    ): TheSportsDbLeagueResponse
 
     @GET("lookuptable.php")
     suspend fun getStandings(

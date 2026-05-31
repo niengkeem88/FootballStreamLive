@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import keemgames.footballcompanion.domain.use_case.GetMatchByIdUseCase
 import keemgames.footballcompanion.domain.repository.FootballRepository
+import keemgames.footballcompanion.data.preferences.SupportedLanguage
+import keemgames.footballcompanion.domain.repository.PreferencesRepository
 import keemgames.footballcompanion.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,15 +19,26 @@ import javax.inject.Inject
 class MatchDetailsViewModel @Inject constructor(
     private val getMatchByIdUseCase: GetMatchByIdUseCase,
     private val footballRepository: FootballRepository,
+    private val preferencesRepository: PreferencesRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MatchDetailsState())
     val state: StateFlow<MatchDetailsState> = _state.asStateFlow()
 
+    private var currentLangSuffix: String = "EN"
+
     init {
         savedStateHandle.get<String>("matchUrl")?.let { eventId ->
             getMatchDetails(eventId)
+        }
+        // Listen for language changes
+        viewModelScope.launch {
+            preferencesRepository.selectedLanguageFlow.collect { langCode ->
+                currentLangSuffix = SupportedLanguage.fromCode(langCode).apiFieldSuffix
+                // Reload preview if match is loaded
+                _state.value.match?.let { m -> loadPreview(m) }
+            }
         }
     }
 
@@ -42,6 +55,7 @@ class MatchDetailsViewModel @Inject constructor(
                         if (m.homeTeamId.isNotBlank() || m.awayTeamId.isNotBlank()) loadPlayers(m)
                         if (m.homeTeamId.isNotBlank() && m.awayTeamId.isNotBlank()) loadHeadToHead(m.homeTeamId, m.awayTeamId)
                         if (m.idLeague.isNotBlank()) loadTopScorers(m.idLeague)
+                        loadPreview(m)
                     }
                 }
                 is Resource.Error -> {
@@ -99,6 +113,37 @@ class MatchDetailsViewModel @Inject constructor(
             }
 
             _state.value = _state.value.copy(playersLoading = false)
+        }
+    }
+
+    private fun loadPreview(match: keemgames.footballcompanion.domain.model.Match) {
+        _state.value = _state.value.copy(previewLoading = true)
+        viewModelScope.launch {
+            // Load league description
+            if (match.idLeague.isNotBlank()) {
+                val leagueResult = footballRepository.getLeagueDescription(match.idLeague, currentLangSuffix)
+                if (leagueResult is Resource.Success) {
+                    _state.value = _state.value.copy(previewLeagueDesc = leagueResult.data)
+                }
+            }
+
+            // Load home team description
+            if (match.homeTeamId.isNotBlank()) {
+                val homeResult = footballRepository.getTeamDescription(match.homeTeamId, currentLangSuffix)
+                if (homeResult is Resource.Success) {
+                    _state.value = _state.value.copy(previewHomeDesc = homeResult.data)
+                }
+            }
+
+            // Load away team description
+            if (match.awayTeamId.isNotBlank()) {
+                val awayResult = footballRepository.getTeamDescription(match.awayTeamId, currentLangSuffix)
+                if (awayResult is Resource.Success) {
+                    _state.value = _state.value.copy(previewAwayDesc = awayResult.data)
+                }
+            }
+
+            _state.value = _state.value.copy(previewLoading = false)
         }
     }
 

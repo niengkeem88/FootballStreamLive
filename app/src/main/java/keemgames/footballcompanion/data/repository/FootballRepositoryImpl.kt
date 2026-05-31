@@ -10,6 +10,8 @@ import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbApiService
 import keemgames.footballcompanion.domain.model.Match
 import keemgames.footballcompanion.domain.model.Team
 import keemgames.footballcompanion.domain.model.TopScorer
+import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbLeagueDto
+import keemgames.footballcompanion.data.remote.thesportsdb.TheSportsDbTeamDto
 import keemgames.footballcompanion.domain.repository.FootballRepository
 import keemgames.footballcompanion.domain.repository.PlayerInfo
 import keemgames.footballcompanion.domain.repository.StandingEntry
@@ -102,6 +104,28 @@ class FootballRepositoryImpl @Inject constructor(
             Resource.Success(players)
         } catch (e: Exception) {
             Resource.Error("Failed to load players: ${e.message}")
+        }
+    }
+
+    override suspend fun getLeagueDescription(leagueId: String, langSuffix: String): Resource<String> = withContext(Dispatchers.IO) {
+        try {
+            val response = theSportsDbApi.getLeagueById(leagueId)
+            val desc = response.leagues?.firstOrNull()?.getDescription(langSuffix)
+                ?: return@withContext Resource.Error("No description available")
+            Resource.Success(desc)
+        } catch (e: Exception) {
+            Resource.Error("Failed to load league info: ${e.message}")
+        }
+    }
+
+    override suspend fun getTeamDescription(teamId: String, langSuffix: String): Resource<String> = withContext(Dispatchers.IO) {
+        try {
+            val response = theSportsDbApi.getTeamById(teamId)
+            val desc = response.teams?.firstOrNull()?.getDescription(langSuffix)
+                ?: return@withContext Resource.Error("No description available")
+            Resource.Success(desc)
+        } catch (e: Exception) {
+            Resource.Error("Failed to load team info: ${e.message}")
         }
     }
 

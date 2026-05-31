@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import keemgames.footballcompanion.domain.model.Match
+import keemgames.footballcompanion.data.preferences.SupportedLanguage
 import keemgames.footballcompanion.presentation.components.ads.AdMobBannerAd
 import keemgames.footballcompanion.presentation.components.ads.AdMobInterstitialHelper
 import keemgames.footballcompanion.presentation.components.ads.AdMobNativeAdView
@@ -53,6 +55,12 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        // Language selector
+        LanguageSelector(
+            selectedLanguage = viewModel.selectedLanguage.collectAsState().value,
+            onLanguageSelected = { viewModel.setLanguage(it) }
         )
 
         // Date range filter chips
@@ -172,6 +180,60 @@ fun HomeScreen(
         }
 
         AdMobBannerAd(adUnitId = "ca-app-pub-3940256099942544/6300978111", modifier = Modifier.fillMaxWidth())
+    }
+}
+
+// ====================== LANGUAGE SELECTOR ======================
+
+@Composable
+private fun LanguageSelector(
+    selectedLanguage: SupportedLanguage,
+    onLanguageSelected: (SupportedLanguage) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Box {
+            TextButton(onClick = { expanded = true }) {
+                Icon(
+                    Icons.Default.Language,
+                    contentDescription = "Language",
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    selectedLanguage.displayName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                SupportedLanguage.entries.forEach { lang ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                lang.displayName,
+                                fontWeight = if (lang == selectedLanguage) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        onClick = {
+                            onLanguageSelected(lang)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 

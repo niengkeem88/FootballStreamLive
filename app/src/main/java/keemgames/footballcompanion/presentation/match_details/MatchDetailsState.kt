@@ -18,5 +18,9 @@ data class MatchDetailsState(
     val headToHead: List<Match> = emptyList(),
     val headToHeadLoading: Boolean = false,
     val topScorers: List<TopScorer> = emptyList(),
-    val topScorersLoading: Boolean = false
+    val topScorersLoading: Boolean = false,
+    val previewLeagueDesc: String? = null,
+    val previewHomeDesc: String? = null,
+    val previewAwayDesc: String? = null,
+    val previewLoading: Boolean = false
 )

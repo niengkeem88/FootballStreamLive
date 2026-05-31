@@ -22,6 +22,7 @@ class AppPreferencesRepository @Inject constructor(
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val SELECTED_REGION = stringPreferencesKey("selected_region")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val SELECTED_LANGUAGE = stringPreferencesKey("selected_language")
     }
 
     val themeModeFlow: Flow<String> = context.dataStore.data
@@ -46,6 +47,17 @@ class AppPreferencesRepository @Inject constructor(
             preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false
         }
 
+    val selectedLanguageFlow: Flow<String> = context.dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }.map { preferences ->
+            preferences[PreferencesKeys.SELECTED_LANGUAGE] ?: SupportedLanguage.EN.code
+        }
+
     suspend fun updateThemeMode(mode: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.THEME_MODE] = mode
@@ -61,6 +73,12 @@ class AppPreferencesRepository @Inject constructor(
     suspend fun updateSelectedRegion(region: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SELECTED_REGION] = region
+        }
+    }
+
+    suspend fun setSelectedLanguage(languageCode: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SELECTED_LANGUAGE] = languageCode
         }
     }
 }

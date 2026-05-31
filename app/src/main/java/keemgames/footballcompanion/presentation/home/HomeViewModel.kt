@@ -3,6 +3,8 @@ package keemgames.footballcompanion.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import keemgames.footballcompanion.data.preferences.SupportedLanguage
+import keemgames.footballcompanion.domain.repository.PreferencesRepository
 import keemgames.footballcompanion.domain.use_case.GetLiveMatchesUseCase
 import keemgames.footballcompanion.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,14 +15,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getLiveMatchesUseCase: GetLiveMatchesUseCase
+    private val getLiveMatchesUseCase: GetLiveMatchesUseCase,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
+    private val _selectedLanguage = MutableStateFlow(SupportedLanguage.EN)
+    val selectedLanguage: StateFlow<SupportedLanguage> = _selectedLanguage.asStateFlow()
+
     init {
         getMatches()
+        viewModelScope.launch {
+            preferencesRepository.selectedLanguageFlow.collect { code ->
+                _selectedLanguage.value = SupportedLanguage.fromCode(code)
+            }
+        }
     }
 
     fun getMatches() {
@@ -65,5 +76,11 @@ class HomeViewModel @Inject constructor(
 
     fun setDateFilter(filter: DateFilterOption) {
         _state.value = _state.value.copy(dateFilter = filter)
+    }
+
+    fun setLanguage(language: SupportedLanguage) {
+        viewModelScope.launch {
+            preferencesRepository.setSelectedLanguage(language.code)
+        }
     }
 }

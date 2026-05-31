@@ -74,11 +74,12 @@ fun MatchDetailsScreen(
         } else {
             state.match?.let { match ->
                 // Tab Row
-                val tabs = listOf("Overview", "Lineups", "Standings", "Top Scorers", "H2H")
-                TabRow(
+                val tabs = listOf("Preview", "Overview", "Lineups", "Standings", "Top Scorers", "H2H")
+                ScrollableTabRow(
                     selectedTabIndex = state.selectedTab,
                     containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    edgePadding = 8.dp
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
@@ -96,11 +97,22 @@ fun MatchDetailsScreen(
                 }
 
                 when (state.selectedTab) {
-                    0 -> OverviewTab(match, rewardedHelper, activity)
-                    1 -> LineupsTab(state.homePlayers, state.awayPlayers, match, state.playersLoading)
-                    2 -> StandingsTab(state.standings, state.standingsLoading)
-                    3 -> TopScorersTab(state.topScorers, state.topScorersLoading)
-                    4 -> HeadToHeadTab(state.headToHead, state.headToHeadLoading)
+                    0 -> PreviewTab(
+                        leagueDesc = state.previewLeagueDesc,
+                        homeDesc = state.previewHomeDesc,
+                        awayDesc = state.previewAwayDesc,
+                        homeTeam = match.homeTeam,
+                        awayTeam = match.awayTeam,
+                        competition = match.competition,
+                        homeTeamBadge = match.homeTeamBadge,
+                        awayTeamBadge = match.awayTeamBadge,
+                        isLoading = state.previewLoading
+                    )
+                    1 -> OverviewTab(match, rewardedHelper, activity)
+                    2 -> LineupsTab(state.homePlayers, state.awayPlayers, match, state.playersLoading)
+                    3 -> StandingsTab(state.standings, state.standingsLoading)
+                    4 -> TopScorersTab(state.topScorers, state.topScorersLoading)
+                    5 -> HeadToHeadTab(state.headToHead, state.headToHeadLoading)
                 }
             }
         }
@@ -438,6 +450,174 @@ private fun StandingRow(entry: StandingEntry) {
             Text(gdText, Modifier.width(28.dp), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = gdColor, textAlign = TextAlign.Center)
 
             Text("${entry.points}", Modifier.width(30.dp), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+// ====================== PREVIEW TAB ======================
+
+@Composable
+private fun PreviewTab(
+    leagueDesc: String?,
+    homeDesc: String?,
+    awayDesc: String?,
+    homeTeam: String,
+    awayTeam: String,
+    competition: String,
+    homeTeamBadge: String?,
+    awayTeamBadge: String?,
+    isLoading: Boolean
+) {
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        return
+    }
+
+    val hasContent = !leagueDesc.isNullOrBlank() || !homeDesc.isNullOrBlank() || !awayDesc.isNullOrBlank()
+
+    if (!hasContent) {
+        Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+            Text(
+                "Match preview unavailable for this fixture",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+        }
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Match header
+        item {
+            GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (!homeTeamBadge.isNullOrBlank()) {
+                        AsyncImage(model = homeTeamBadge, contentDescription = null,
+                            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit)
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(homeTeam, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text("VS", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text(awayTeam, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    if (!awayTeamBadge.isNullOrBlank()) {
+                        AsyncImage(model = awayTeamBadge, contentDescription = null,
+                            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit)
+                    }
+                }
+            }
+        }
+
+        // League description
+        if (!leagueDesc.isNullOrBlank()) {
+            item(key = "league_desc") {
+                DescriptionCard(
+                    title = competition,
+                    content = leagueDesc
+                )
+            }
+        }
+
+        // Home team description
+        if (!homeDesc.isNullOrBlank()) {
+            item(key = "home_desc") {
+                DescriptionCard(
+                    title = homeTeam,
+                    badgeUrl = homeTeamBadge,
+                    content = homeDesc
+                )
+            }
+        }
+
+        // Away team description
+        if (!awayDesc.isNullOrBlank()) {
+            item(key = "away_desc") {
+                DescriptionCard(
+                    title = awayTeam,
+                    badgeUrl = awayTeamBadge,
+                    content = awayDesc
+                )
+            }
+        }
+
+        // Banner ad
+        item {
+            AdMobBannerAd(
+                adUnitId = "ca-app-pub-3940256099942544/6300978111",
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun DescriptionCard(
+    title: String,
+    content: String,
+    badgeUrl: String? = null
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val maxCollapsedLength = 250
+
+    GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!badgeUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = badgeUrl,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp).clip(RoundedCornerShape(6.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            val displayText = if (!expanded && content.length > maxCollapsedLength) {
+                content.take(maxCollapsedLength) + "..."
+            } else {
+                content
+            }
+
+            Text(
+                text = displayText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                lineHeight = 20.sp
+            )
+
+            if (content.length > maxCollapsedLength) {
+                Spacer(Modifier.height(4.dp))
+                TextButton(onClick = { expanded = !expanded }) {
+                    Text(
+                        if (expanded) "Show Less" else "Read More",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 }
