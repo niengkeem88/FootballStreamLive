@@ -38,6 +38,8 @@ interface FootballRepository {
 
     suspend fun getTeamPlayers(teamId: String): Resource<List<PlayerInfo>>
 
+    suspend fun getHeadToHead(homeTeamId: String, awayTeamId: String): Resource<List<Match>>
+
     fun getFavoriteMatches(): Flow<List<Match>>
 
     suspend fun toggleFavoriteMatch(match: Match)

@@ -74,7 +74,7 @@ fun MatchDetailsScreen(
         } else {
             state.match?.let { match ->
                 // Tab Row
-                val tabs = listOf("Overview", "Lineups", "Standings", "Stats")
+                val tabs = listOf("Overview", "Lineups", "Standings", "Stats", "H2H")
                 TabRow(
                     selectedTabIndex = state.selectedTab,
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -100,6 +100,7 @@ fun MatchDetailsScreen(
                     1 -> LineupsTab(state.homePlayers, state.awayPlayers, match, state.playersLoading)
                     2 -> StandingsTab(state.standings, state.standingsLoading)
                     3 -> StatsTab(match)
+                    4 -> HeadToHeadTab(state.headToHead, state.headToHeadLoading)
                 }
             }
         }
@@ -437,6 +438,150 @@ private fun StandingRow(entry: StandingEntry) {
             Text(gdText, Modifier.width(28.dp), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = gdColor, textAlign = TextAlign.Center)
 
             Text("${entry.points}", Modifier.width(30.dp), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+// ====================== HEAD TO HEAD TAB ======================
+
+@Composable
+private fun HeadToHeadTab(
+    headToHead: List<keemgames.footballcompanion.domain.model.Match>,
+    isLoading: Boolean
+) {
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        return
+    }
+
+    if (headToHead.isEmpty()) {
+        Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+            Text(
+                "No previous encounters found",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(
+                        "Head to Head History",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "${headToHead.size} previous meeting(s)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        items(headToHead) { match ->
+            H2HMatchCard(match = match)
+        }
+    }
+}
+
+@Composable
+private fun H2HMatchCard(match: keemgames.footballcompanion.domain.model.Match) {
+    GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Home team
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (!match.homeTeamBadge.isNullOrBlank()) {
+                    AsyncImage(
+                        model = match.homeTeamBadge,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(6.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    match.homeTeam,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+            }
+
+            // Score / VS
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            ) {
+                Text(
+                    "${match.homeScore ?: "-"} : ${match.awayScore ?: "-"}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                if (match.date.isNotBlank()) {
+                    Text(
+                        match.date,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (match.competition.isNotBlank()) {
+                    Text(
+                        match.competition,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        maxLines = 1
+                    )
+                }
+            }
+
+            // Away team
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (!match.awayTeamBadge.isNullOrBlank()) {
+                    AsyncImage(
+                        model = match.awayTeamBadge,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(6.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    match.awayTeam,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+            }
         }
     }
 }

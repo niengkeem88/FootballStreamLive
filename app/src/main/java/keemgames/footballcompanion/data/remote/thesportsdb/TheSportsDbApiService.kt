@@ -31,7 +31,7 @@ interface TheSportsDbApiService {
     @GET("eventslast.php")
     suspend fun getLastEventsByTeam(
         @Query("id") teamId: String
-    ): TheSportsDbEventsResponse
+    ): TheSportsDbLastEventsResponse
 
     @GET("lookupleague.php")
     suspend fun getLeagueById(

@@ -13,5 +13,7 @@ data class MatchDetailsState(
     val homePlayers: List<PlayerInfo> = emptyList(),
     val awayPlayers: List<PlayerInfo> = emptyList(),
     val standingsLoading: Boolean = false,
-    val playersLoading: Boolean = false
+    val playersLoading: Boolean = false,
+    val headToHead: List<Match> = emptyList(),
+    val headToHeadLoading: Boolean = false
 )

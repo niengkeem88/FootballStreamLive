@@ -122,6 +122,14 @@ data class StandingEntryDto(
     val intRank: String? = null
 )
 
+
+// -- Last Events (for head-to-head) --
+
+data class TheSportsDbLastEventsResponse(
+    @SerializedName("results")
+    val results: List<TheSportsDbEventDto>? = null
+)
+
 // -- Players --
 
 data class TheSportsDbPlayersResponse(

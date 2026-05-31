@@ -104,6 +104,30 @@ class FootballRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getHeadToHead(homeTeamId: String, awayTeamId: String): Resource<List<Match>> = withContext(Dispatchers.IO) {
+        try {
+            val homeResponse = theSportsDbApi.getLastEventsByTeam(homeTeamId)
+            val awayResponse = theSportsDbApi.getLastEventsByTeam(awayTeamId)
+
+            // Collect all events from both teams
+            val allEvents = (homeResponse.results.orEmpty() + awayResponse.results.orEmpty())
+
+            // Find head-to-head matches (either direction)
+            val h2h = allEvents
+                .filter { event ->
+                    (event.idHomeTeam == homeTeamId && event.idAwayTeam == awayTeamId) ||
+                    (event.idHomeTeam == awayTeamId && event.idAwayTeam == homeTeamId)
+                }
+                .distinctBy { it.idEvent ?: "" }
+                .sortedByDescending { it.dateEvent }
+                .map { it.theSportsDbToMatch() }
+
+            Resource.Success(h2h)
+        } catch (e: Exception) {
+            Resource.Error("Failed to load head-to-head: ${e.message}")
+        }
+    }
+
     override fun getFavoriteMatches(): Flow<List<Match>> {
         return dao.getAllFavoriteMatches().map { entities ->
             entities.map { entity -> entity.favoriteToMatch() }
