@@ -795,8 +795,7 @@ private fun TopScorersTab(
     if (topScorers.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Text(
-                "No player data available.
-Upgrade to a premium TheSportsDB key for full stats.",
+                "No player data available. Upgrade to a premium TheSportsDB key for full stats.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center
