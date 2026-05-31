@@ -111,7 +111,6 @@ fun MatchDetailsScreen(
 @Composable
 private fun OverviewTab(
     match: keemgames.footballcompanion.domain.model.Match,
-    state: MatchDetailsState,
     rewardedHelper: AdMobRewardedAdHelper,
     activity: Activity?
 ) {
