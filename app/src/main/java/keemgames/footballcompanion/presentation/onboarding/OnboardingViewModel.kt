@@ -13,9 +13,8 @@ class OnboardingViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun completeOnboarding(onComplete: () -> Unit) {
-        viewModelScope.launch {
-            repository.setOnboardingCompleted(true)
-            onComplete()
-        }
+        // Onboarding is shown on every app launch.
+        // Just navigate to home without persisting the completed flag.
+        onComplete()
     }
 }

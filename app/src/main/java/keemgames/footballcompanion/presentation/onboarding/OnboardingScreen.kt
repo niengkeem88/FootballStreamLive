@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import keemgames.footballcompanion.presentation.components.ads.AdMobBannerAd
+import keemgames.footballcompanion.presentation.components.ads.AdMobInterstitialHelper
 import keemgames.footballcompanion.presentation.theme.MidnightNavy
 import keemgames.footballcompanion.presentation.theme.NeonPitchGreen
 import kotlinx.coroutines.launch
@@ -57,6 +58,12 @@ fun OnboardingScreen(
 ) {
     val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val activity = context as? android.app.Activity
+    val interstitialHelper = remember { AdMobInterstitialHelper() }
+    LaunchedEffect(Unit) {
+        activity?.let { interstitialHelper.loadAd(it, "ca-app-pub-3940256099942544/1033173712") }
+    }
 
     Box(
         modifier = Modifier
@@ -130,9 +137,19 @@ fun OnboardingScreen(
                 Button(
                     onClick = {
                         if (isLastPage) {
-                            viewModel.completeOnboarding(onFinish)
+                            activity?.let { act ->
+                                interstitialHelper.showAdIfReady(act) {
+                                    viewModel.completeOnboarding(onFinish)
+                                }
+                            } ?: viewModel.completeOnboarding(onFinish)
                         } else {
-                            scope.launch {
+                            activity?.let { act ->
+                                interstitialHelper.showAdIfReady(act) {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                }
+                            } ?: scope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
                         }
