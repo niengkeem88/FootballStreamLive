@@ -58,4 +58,12 @@ class HomeViewModel @Inject constructor(
     fun selectTab(index: Int) {
         _state.value = _state.value.copy(selectedTab = index)
     }
+
+    fun updateSearchQuery(query: String) {
+        _state.value = _state.value.copy(searchQuery = query)
+    }
+
+    fun setDateFilter(filter: DateFilterOption) {
+        _state.value = _state.value.copy(dateFilter = filter)
+    }
 }
