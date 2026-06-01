@@ -25,18 +25,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             FootballPulseLiveTheme {
                 val startDestination by viewModel.startDestination.collectAsState()
-                
-                if (startDestination != null) {
-                    val navController = rememberNavController()
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        SetupNavGraph(
-                            navController = navController,
-                            startDestination = startDestination!!
-                        )
-                    }
+                val navController = rememberNavController()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    SetupNavGraph(
+                        navController = navController,
+                        startDestination = startDestination
+                    )
                 }
             }
         }
