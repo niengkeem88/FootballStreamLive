@@ -91,15 +91,10 @@ class MatchDetailsViewModel @Inject constructor(
         _state.value = _state.value.copy(playersLoading = true)
 
         viewModelScope.launch {
-            var homeSuccess = true
-            var awaySuccess = true
-
             if (match.homeTeamId.isNotBlank()) {
                 val homeResult = footballRepository.getTeamPlayers(match.homeTeamId)
                 if (homeResult is Resource.Success) {
                     _state.value = _state.value.copy(homePlayers = homeResult.data ?: emptyList())
-                } else {
-                    homeSuccess = false
                 }
             }
 
@@ -107,8 +102,6 @@ class MatchDetailsViewModel @Inject constructor(
                 val awayResult = footballRepository.getTeamPlayers(match.awayTeamId)
                 if (awayResult is Resource.Success) {
                     _state.value = _state.value.copy(awayPlayers = awayResult.data ?: emptyList())
-                } else {
-                    awaySuccess = false
                 }
             }
 
